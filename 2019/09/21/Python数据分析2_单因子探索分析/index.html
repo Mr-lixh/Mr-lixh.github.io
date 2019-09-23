@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="lixh's blog"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>Python数据分析2_单因子探索分析 | lixh's blog</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Python数据分析2_单因子探索分析</h1><a id="logo" href="/.">lixh's blog</a><p class="description">Learn and Share</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Python数据分析2_单因子探索分析</h1><div class="post-meta"><a href="/2019/09/21/Python数据分析2_单因子探索分析/#comments" class="comment-count"></a><p><span class="date">Sep 21, 2019</span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><a id="more"></a>
+
+<h1 id="单因子探索分析"><a href="#单因子探索分析" class="headerlink" title="单因子探索分析"></a>单因子探索分析</h1><hr>
+<h2 id="理论知识"><a href="#理论知识" class="headerlink" title="理论知识"></a>理论知识</h2><ul>
+<li>集中趋势：均值、中位数与分位数、众数<ul>
+<li>四分位数计算：(n+1)*0.25，0.5，0.75</li>
+</ul>
+</li>
+<li>离中趋势：标准差、方差</li>
+<li>数据分布：偏态与峰态、正态分布与三大分布<ul>
+<li><strong>偏态</strong>：以平均值与中位数之差对标准差之比率来衡量数据分布的<strong>偏斜程度</strong></li>
+<li><strong>峰态</strong>：峰态通常是与标准正态分布相比较而言的。如果一组数据服从标准正态分布，则峰态系数的值等于0；若峰态系数的值明显不等于0，则表明分布比正态分布更平或更尖，通常称为平峰分布或尖峰分布。表明了数据分布的<strong>集中程度</strong></li>
+<li><strong>三大分布</strong>：卡方分布、t 分布和 F 分布</li>
+</ul>
+</li>
+<li>抽样理论：抽样误差与抽样精度</li>
+</ul>
+<p><img src="/images/data_ana_2.png" alt="data_ana_2"></p>
+<hr>
+<h2 id="数据分类"><a href="#数据分类" class="headerlink" title="数据分类"></a>数据分类</h2><ul>
+<li>定类（类别）：根据事物离散、无差别属性进行的分类。类别间是无差距的</li>
+<li>定序（顺序）：可以界定数据的大小，但不能测定差值。如收入的低、中、高</li>
+<li>定距（间隔）：可以界定数据大小的同时，可测定差值，但无绝对零点。即乘法、除法、比率没有意义</li>
+<li>定比（比率）：可以界定数据大小，可测定差值，有绝对零点。如身高、体重、体积等</li>
+</ul>
+<hr>
+<h2 id="单属性分析"><a href="#单属性分析" class="headerlink" title="单属性分析"></a>单属性分析</h2><ul>
+<li>异常值分析：离散异常值、连续异常值、常识异常值</li>
+</ul>
+<p><img src="/images/data_ana_3.png" alt="data_ana_3"></p>
+<ul>
+<li>对比分析：绝对数和相对数，时间、空间、理论维度比较<ul>
+<li>相对数：将几个有联系的指标进行联合，构成新的数。<ul>
+<li>结构相对数：部分与整体相比。如合格率</li>
+<li>比例相对数：整体内的不同部分进行比较。如不同产业间的比较</li>
+<li>比较相对数：同一时空下的相似或同质的指标进行对比。如不同时期下同一商品的价格，不同电商的待遇水平比较等</li>
+<li>动态相对数：含有时间概念。如速度、增速</li>
+<li>强度相对数：性质不同但有相互联系的属性进行联合。如人均、密度</li>
+</ul>
+</li>
+<li>时间维度：如同比、环比；空间维度；经验与计划</li>
+</ul>
+</li>
+<li>结构分析：各组成部分的分布与规律<ul>
+<li>静态结构分析（饼状图）</li>
+<li>动态结构分析：以时间为轴，分析变化的动态趋势（折线图）</li>
+</ul>
+</li>
+<li>分布分析：数据分布频率的显式分析<ul>
+<li>直接获得概率分布</li>
+<li>判断是不是正态分布</li>
+<li>极大似然</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-copyright"><blockquote><p>原文作者: lixh</p><p>原文链接: <a href="http://yoursite.com/2019/09/21/Python数据分析2_单因子探索分析/">http://yoursite.com/2019/09/21/Python数据分析2_单因子探索分析/</a></p><p>版权声明: 转载请注明出处(必须保留原文作者署名原文链接)</p></blockquote></div><div class="tags"><a href="/tags/数据分析/">数据分析</a></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2019/09/21/Python数据分析3_多因子探索分析/" class="pre">Python数据分析3_多因子探索分析</a><a href="/2019/09/21/Python数据分析1_数据获取/" class="next">Python数据分析1_数据获取</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '797d74e1958a846713d9',
+  clientSecret: '2bab30fb152aaf3d7f61a916fbe04135e950f57f',
+  repo: 'Mr-lixh.github.io',
+  owner: 'Mr-lixh',
+  admin: ['Mr-lixh'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#单因子探索分析"><span class="toc-text">单因子探索分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#理论知识"><span class="toc-text">理论知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据分类"><span class="toc-text">数据分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单属性分析"><span class="toc-text">单属性分析</span></a></li></ol></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析6_模型评估/">Python数据分析6_模型评估</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析5_数据建模/">Python数据分析5_数据建模</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析4_数据预处理/">Python数据分析4_数据预处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/21/Python数据分析3_多因子探索分析/">Python数据分析3_多因子探索分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/21/Python数据分析2_单因子探索分析/">Python数据分析2_单因子探索分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/21/Python数据分析1_数据获取/">Python数据分析1_数据获取</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/16/Python数据分析_基础技术篇/">Python数据分析_基础技术篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/10/OnlineJudge项目总结/">OnlineJudge项目总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/31/MySQL面试指南_笔记二/">MySQL面试指南_笔记二</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/30/MySQL面试指南_笔记一/">MySQL面试指南_笔记一</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/开发/" style="font-size: 15px;">开发</a> <a href="/tags/数据分析/" style="font-size: 15px;">数据分析</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://github.com/Mr-lixh" title="github" target="_blank">github</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">lixh.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?13549e9998ed36aa1cfcbd1ebe61afe0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>
