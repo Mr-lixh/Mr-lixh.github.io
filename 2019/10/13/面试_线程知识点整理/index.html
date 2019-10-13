@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="lixh's blog"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>面试_线程知识点整理 | lixh's blog</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">面试_线程知识点整理</h1><a id="logo" href="/.">lixh's blog</a><p class="description">Learn and Share</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">面试_线程知识点整理</h1><div class="post-meta"><a href="/2019/10/13/面试_线程知识点整理/#comments" class="comment-count"></a><p><span class="date">Oct 13, 2019</span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><a id="more"></a>
+
+<h2 id="1-为什么要用线程池"><a href="#1-为什么要用线程池" class="headerlink" title="1. 为什么要用线程池"></a>1. 为什么要用线程池</h2><ul>
+<li>线程池</li>
+</ul>
+<p>线程池是指在初始化一个多线程应用程序过程中创建一个线程集合，然后在需要执行新的任务时重用这些线程而不是新建一个线程。</p>
+<ul>
+<li>使用线程池的好处</li>
+</ul>
+<ol>
+<li><p>线程池改进了一个应用程序的响应时间。由于线程池中的线程已经准备好且等待被分配任务，应用程序可以直接拿来使用而不用新建一个线程。</p>
+</li>
+<li><p>线程池节省了CLR 为每个短生存周期任务创建一个完整的线程的开销并可以在任务完成后回收资源。</p>
+</li>
+<li><p>线程池根据当前在系统中运行的进程来优化线程时间片。</p>
+</li>
+<li><p>线程池允许我们开启多个任务而不用为每个线程设置属性。</p>
+</li>
+<li><p>线程池允许我们为正在执行的任务的程序参数传递一个包含状态信息的对象引用。</p>
+</li>
+<li><p>线程池可以用来解决处理一个特定请求最大线程数量限制问题。</p>
+</li>
+</ol>
+<h2 id="2-什么是线程死锁？死锁如何产生？如何避免线程死锁？"><a href="#2-什么是线程死锁？死锁如何产生？如何避免线程死锁？" class="headerlink" title="2. 什么是线程死锁？死锁如何产生？如何避免线程死锁？"></a>2. 什么是线程死锁？死锁如何产生？如何避免线程死锁？</h2><ul>
+<li><p>线程死锁是指由于两个或者多个线程互相持有对方所需要的资源，导致这些线程处于等待状态，无法前往执行。当线程进入对象的synchronized代码块时，便占有了资源，直到它退出该代码块或者调用wait方法，才释放资源，在此期间，其他线程将不能进入该代码块。当线程互相持有对方所需要的资源时，会互相等待对方释放资源，如果线程都不主动释放所占有的资源，将产生死锁。</p>
+</li>
+<li><p>如何避免：</p>
+</li>
+</ul>
+<ol>
+<li>加锁顺序：当多个线程需要相同的一些锁，但是按照不同的顺序加锁，死锁就很容易发生。如果能确保所有的线程都是按照相同的顺序获得锁，那么死锁就不会发生。当然这种方式需要你事先知道所有可能会用到的锁，然而总有些时候是无法预知的。</li>
+<li>加锁时限：加上一个超时时间，若一个线程没有在给定的时限内成功获得所有需要的锁，则会进行回退并释放所有已经获得的锁，然后等待一段随机的时间再重试。但是如果有非常多的线程同一时间去竞争同一批资源，就算有超时和回退机制，还是可能会导致这些线程重复地尝试但却始终得不到锁。</li>
+<li>死锁检测：死锁检测即每当一个线程获得了锁，会在线程和锁相关的数据结构中（map、graph等等）将其记下。除此之外，每当有线程请求锁，也需要记录在这个数据结构中。死锁检测是一个更好的死锁预防机制，它主要是针对那些不可能实现按序加锁并且锁超时也不可行的场景。</li>
+</ol>
+</div><div class="post-copyright"><blockquote><p>原文作者: lixh</p><p>原文链接: <a href="http://yoursite.com/2019/10/13/面试_线程知识点整理/">http://yoursite.com/2019/10/13/面试_线程知识点整理/</a></p><p>版权声明: 转载请注明出处(必须保留原文作者署名原文链接)</p></blockquote></div><div class="tags"><a href="/tags/Java/">Java</a></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2019/10/13/面试_MySQL优化/" class="pre">面试_MySQL优化</a><a href="/2019/10/13/面试_JVM面试问题整理/" class="next">面试_JVM面试问题整理</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '797d74e1958a846713d9',
+  clientSecret: '2bab30fb152aaf3d7f61a916fbe04135e950f57f',
+  repo: 'Mr-lixh.github.io',
+  owner: 'Mr-lixh',
+  admin: ['Mr-lixh'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-为什么要用线程池"><span class="toc-text">1. 为什么要用线程池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-什么是线程死锁？死锁如何产生？如何避免线程死锁？"><span class="toc-text">2. 什么是线程死锁？死锁如何产生？如何避免线程死锁？</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_Spring知识点/">面试_Spring知识点</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_线程知识点整理/">面试_线程知识点整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_MySQL优化/">面试_MySQL优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_JVM面试问题整理/">面试_JVM面试问题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/11/Spring框架/">Spring框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/Docker的一些整理/">Docker的一些整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析6_模型评估/">Python数据分析6_模型评估</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析5_数据建模/">Python数据分析5_数据建模</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析4_数据预处理/">Python数据分析4_数据预处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/21/Python数据分析3_多因子探索分析/">Python数据分析3_多因子探索分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/开发/" style="font-size: 15px;">开发</a> <a href="/tags/数据分析/" style="font-size: 15px;">数据分析</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/虚拟化/" style="font-size: 15px;">虚拟化</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://github.com/Mr-lixh" title="github" target="_blank">github</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">lixh.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?13549e9998ed36aa1cfcbd1ebe61afe0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>
