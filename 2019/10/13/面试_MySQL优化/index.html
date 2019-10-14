@@ -1,6 +1,82 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="lixh's blog"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>面试_MySQL优化 | lixh's blog</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">面试_MySQL优化</h1><a id="logo" href="/.">lixh's blog</a><p class="description">Learn and Share</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">面试_MySQL优化</h1><div class="post-meta"><a href="/2019/10/13/面试_MySQL优化/#comments" class="comment-count"></a><p><span class="date">Oct 13, 2019</span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><a id="more"></a>
 
-<h2 id="1-常用的优化经验"><a href="#1-常用的优化经验" class="headerlink" title="1. 常用的优化经验"></a>1. 常用的优化经验</h2><ol>
+<p><img src="/images/database_01.png" alt="database_01"></p>
+<h1 id="1-索引模块"><a href="#1-索引模块" class="headerlink" title="1. 索引模块"></a>1. 索引模块</h1><h2 id="1-1-相关概念"><a href="#1-1-相关概念" class="headerlink" title="1.1 相关概念"></a>1.1 相关概念</h2><p><strong>为什么要使用索引？</strong></p>
+<ul>
+<li>为了避免全表扫描，快速查询数据。</li>
+</ul>
+<p><strong>什么样的信息能成为索引？</strong></p>
+<ul>
+<li>主键、唯一键以及普通键等使数据具有区分性的字段</li>
+</ul>
+<p><strong>索引的数据结构</strong></p>
+<ul>
+<li><strong>B+树更适合用来存储索引</strong><ul>
+<li>B+树的磁盘读写代价更低，结点中不存放数据，只存放索引信息</li>
+<li>查询效率更加稳定，都要从根结点查询到叶子结点</li>
+<li>更有利于对数据库的扫描，适合范围查询</li>
+</ul>
+</li>
+<li>二叉查找树<ul>
+<li>平衡二叉查找树查询效率高，但维护困难</li>
+<li>检索深度每增加1，就要增加一次IO。二叉树的深度很深，导致IO次数过多</li>
+</ul>
+</li>
+<li>B树<ul>
+<li>降低树的高度，减少了IO次数</li>
+<li>由于B树特征的约束，不会出现线性恶化的情况</li>
+</ul>
+</li>
+<li>B+树<ul>
+<li>是B树的变体，非叶子结点的子树指针与关键字个数相同；</li>
+<li>非叶子结点仅用来作为索引，数据都保存在叶子结点中；</li>
+<li>所有叶子结点均有一个链指针指向下一个叶子结点，适合横向做<strong>范围统计</strong>。</li>
+</ul>
+</li>
+<li>Hash 索引<ul>
+<li>查询效率比B+树高</li>
+<li>仅能查询“=”或“in”，不能进行范围查询</li>
+<li>无法被用来避免数据的排序操作</li>
+<li>不能利用部分索引键查询，对于组合索引，不能部分计算</li>
+<li>不能避免表扫描，由于hash冲突，也无法保证每次取出的都是要查询的数据，还是需要进行扫描</li>
+</ul>
+</li>
+<li>BitMap 位图索引<ul>
+<li>结构类似于B+树</li>
+<li>适合于某个字段的值只有固定的几个取值</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/database_02.png" alt="database_02"></p>
+<p><strong>密集索引和稀疏索引</strong></p>
+<ul>
+<li>密集索引文件中的每个搜索码值都对应一个索引值。一个表只能创建一个密集索引</li>
+<li>稀疏索引文件只为索引码的某些值建立索引项</li>
+</ul>
+<p>对于MySQL</p>
+<ul>
+<li>MyISAM引擎使用稀疏索引</li>
+<li>InnoDB会为表创建一个密集索引<ul>
+<li>若一个主键被定义，该主键作为密集索引</li>
+<li>主键没有被定义，该表的第一个唯一非空索引则作为密集索引</li>
+<li>若都没有，InnoDB内部会产生一个隐藏主键（6字节）</li>
+<li>非主键索引存储相关键位和其对应的主键值，包含两次查找</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/database_03.png" alt="database_03"></p>
+<h2 id="1-2-索引优化"><a href="#1-2-索引优化" class="headerlink" title="1.2 索引优化"></a>1.2 索引优化</h2><p><strong>如何定位并优化慢查询SQL</strong></p>
+<ul>
+<li>根据慢日志定位慢查询sql：日志中会定位查询语句和查询时间等。</li>
+<li>使用explain等工具分析sql<ul>
+<li>type关键字：index&gt;all</li>
+<li>extra关键字：Using filesort：表示mysql会对结果使用一个外部索引排序，而不是从表里按索引次序读到相关内容；Using temporay：表示mysql在对查询结果排序时使用了临时表，如group by和order by。</li>
+</ul>
+</li>
+<li>修改sql或尽量让sql走索引</li>
+</ul>
+<p><strong>常用的优化经验</strong></p>
+<ol>
 <li><p>对查询进行优化，应尽量避免全表扫描，首先应考虑在 where 及 order by 涉及的列上建立索引。</p>
 </li>
 <li><p>应尽量避免在 where 子句中使用!=或&lt;&gt;操作符，否则引擎将放弃使用索引而进行全表扫描。</p>
@@ -12,7 +88,78 @@
 <li><p>避免频繁创建和删除临时表，以减少系统表资源的消耗。</p>
 </li>
 </ol>
-</div><div class="post-copyright"><blockquote><p>原文作者: lixh</p><p>原文链接: <a href="http://yoursite.com/2019/10/13/面试_MySQL优化/">http://yoursite.com/2019/10/13/面试_MySQL优化/</a></p><p>版权声明: 转载请注明出处(必须保留原文作者署名原文链接)</p></blockquote></div><div class="tags"><a href="/tags/Java/">Java</a></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2019/10/13/面试_Spring知识点/" class="pre">面试_Spring知识点</a><a href="/2019/10/13/面试_线程知识点整理/" class="next">面试_线程知识点整理</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+<p><strong>联合索引的最左匹配原则的成因</strong></p>
+<p>将几个列联合起来建立的索引为联合索引。mysql会从左到右扫描联合索引，如果只针对联合索引中的第二列进行查询，不会使用到索引，因为先按第一列排序后，第二列一般无序。</p>
+<p><strong>索引是越多越好吗？</strong></p>
+<ul>
+<li>数据量小的表不需要建索引，会增加额外的索引开销；</li>
+<li>数据变更时需要维护索引，因此索引越多维护代价越大；</li>
+<li>同时需要的空间也更多。</li>
+</ul>
+<h1 id="2-锁模块"><a href="#2-锁模块" class="headerlink" title="2. 锁模块"></a>2. 锁模块</h1><h2 id="2-1-相关概念"><a href="#2-1-相关概念" class="headerlink" title="2.1 相关概念"></a>2.1 相关概念</h2><p><strong>MyISAM与InnoDB关于锁方面的区别</strong></p>
+<ul>
+<li>MyISAM默认使用表级锁，不支持行级锁</li>
+<li>InnoDB默认使用行级锁，支持表级锁</li>
+</ul>
+<p><strong>事务并发引起的问题</strong></p>
+<ul>
+<li>更新丢失–mysql所有事务隔离级别在数据库层面上均可避免该问题</li>
+<li>脏读–READ-COMMITED隔离级别以上可以避免</li>
+<li>不可重复读（注重修改）–REPEATABLE-READ隔离级别以上可以避免</li>
+<li>幻读（注重插入或删除）–SERIALIZABLE隔离级别可以避免</li>
+</ul>
+<p><img src="/images/database_04.png" alt="database_04"></p>
+<p><strong>InnoDB可重复度隔离级别下如何避免幻读</strong></p>
+<ul>
+<li>表象：快照读（非阻塞读）–伪MVCC<ul>
+<li>当前读：读取的是最新版本，需要加锁</li>
+<li>快照读：读取的可能不是最新的数据，不需要加锁</li>
+</ul>
+</li>
+<li>内在：next-key锁（行锁+gap锁）<ul>
+<li>Gap锁：</li>
+<li><strong>对主键索引或唯一索引使用Gap锁时：</strong><ul>
+<li>如果where条件全部命中（即所要查找的记录都存在），则不会使用gap锁，只会加记录锁；（由于记录的唯一性）</li>
+<li>如果where条件部分命中或全都不命中，则会加Gap锁</li>
+</ul>
+</li>
+<li><strong>在非唯一索引或者不走索引的当前读中使用Gap锁时：</strong><ul>
+<li>对于非唯一索引：对索引值左右两个gap区间（都是左开右闭区间）加间隙锁。</li>
+<li>对于不走索引：对所有的gap都上锁，类似于表锁。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/database_06.png" alt="database_06"></p>
+<p><strong>RC、RR级别下的非阻塞读如何实现</strong></p>
+<ul>
+<li>数据行里的DB_TRX_ID（表识最近一次对本行记录做修改的事务标识符）、DB_ROLL_PTR（回滚指针）、DB_ROW_ID字段</li>
+<li>undo日志：存储事务开始前的老版数据</li>
+<li>read view</li>
+</ul>
+<p><img src="/images/database_05.png" alt="database_05"></p>
+<h1 id="3-语法模块"><a href="#3-语法模块" class="headerlink" title="3. 语法模块"></a>3. 语法模块</h1><h2 id="3-1-关键语法"><a href="#3-1-关键语法" class="headerlink" title="3.1 关键语法"></a>3.1 关键语法</h2><ul>
+<li>GROUP BY<ul>
+<li>必须满足“SELECT子句中的列名必须为分组列或列函数”（只针对一张表查询，多表查询不适用）</li>
+<li>列函数对于GROUP BY子句定义的每个组各返回一个结果</li>
+</ul>
+</li>
+<li>HAVING<ul>
+<li>通常与GROUP BY子句一起使用</li>
+<li>WHERE 过滤行，HAVING过滤组</li>
+<li>出现在同一sql的顺序：WHERE&gt;GROUP BY&gt;HAVING</li>
+</ul>
+</li>
+<li>聚合函数：COUNT、SUM、MAX、MIN、AVG</li>
+</ul>
+<h1 id="4-三大范式模块"><a href="#4-三大范式模块" class="headerlink" title="4. 三大范式模块"></a>4. 三大范式模块</h1><h1 id="5-其他"><a href="#5-其他" class="headerlink" title="5. 其他"></a>5. 其他</h1><h2 id="5-1-面试中项目如何表达比较好？"><a href="#5-1-面试中项目如何表达比较好？" class="headerlink" title="5.1 面试中项目如何表达比较好？"></a>5.1 面试中项目如何表达比较好？</h2><ul>
+<li>站在码农的角度介绍项目，专注技术指标以及解决思路；</li>
+<li>脉路清晰：项目用途–&gt;自己的角色–&gt;如何解决难题</li>
+<li>如果没有难点，则谈谈改进（前提是熟悉相关知识点）</li>
+<li>事前用图形将项目勾画清楚（项目的大体模块）</li>
+</ul>
+</div><div class="post-copyright"><blockquote><p>原文作者: lixh</p><p>原文链接: <a href="http://yoursite.com/2019/10/13/面试_MySQL优化/">http://yoursite.com/2019/10/13/面试_MySQL优化/</a></p><p>版权声明: 转载请注明出处(必须保留原文作者署名原文链接)</p></blockquote></div><div class="tags"><a href="/tags/Java/">Java</a></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2019/10/13/面试_线程知识点整理/" class="pre">面试_线程知识点整理</a><a href="/2019/10/13/面试_JVM面试问题整理/" class="next">面试_JVM面试问题整理</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
   clientID: '797d74e1958a846713d9',
   clientSecret: '2bab30fb152aaf3d7f61a916fbe04135e950f57f',
   repo: 'Mr-lixh.github.io',
@@ -23,7 +170,7 @@
   language: 'zh-CN',
   pagerDirection: 'last'
 })
-gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-常用的优化经验"><span class="toc-text">1. 常用的优化经验</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_Spring知识点/">面试_Spring知识点</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_线程知识点整理/">面试_线程知识点整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_MySQL优化/">面试_MySQL优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_JVM面试问题整理/">面试_JVM面试问题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/11/Spring框架/">Spring框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/Docker的一些整理/">Docker的一些整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析6_模型评估/">Python数据分析6_模型评估</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析5_数据建模/">Python数据分析5_数据建模</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析4_数据预处理/">Python数据分析4_数据预处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/21/Python数据分析3_多因子探索分析/">Python数据分析3_多因子探索分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/开发/" style="font-size: 15px;">开发</a> <a href="/tags/数据分析/" style="font-size: 15px;">数据分析</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/虚拟化/" style="font-size: 15px;">虚拟化</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://github.com/Mr-lixh" title="github" target="_blank">github</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">lixh.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-索引模块"><span class="toc-text">1. 索引模块</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-相关概念"><span class="toc-text">1.1 相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-索引优化"><span class="toc-text">1.2 索引优化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-锁模块"><span class="toc-text">2. 锁模块</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-相关概念"><span class="toc-text">2.1 相关概念</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-语法模块"><span class="toc-text">3. 语法模块</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-关键语法"><span class="toc-text">3.1 关键语法</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-三大范式模块"><span class="toc-text">4. 三大范式模块</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-其他"><span class="toc-text">5. 其他</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-面试中项目如何表达比较好？"><span class="toc-text">5.1 面试中项目如何表达比较好？</span></a></li></ol></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/10/14/面试_Spring框架知识点/">面试_Spring框架知识点</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/14/面试_计算机网络知识点/">面试_计算机网络知识点</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_Spring知识点/">面试_Spring知识点</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_线程知识点整理/">面试_线程知识点整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_MySQL优化/">面试_MySQL优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/13/面试_JVM面试问题整理/">面试_JVM面试问题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/11/Spring框架/">Spring框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/Docker的一些整理/">Docker的一些整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析6_模型评估/">Python数据分析6_模型评估</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/22/Python数据分析5_数据建模/">Python数据分析5_数据建模</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/开发/" style="font-size: 15px;">开发</a> <a href="/tags/数据分析/" style="font-size: 15px;">数据分析</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/虚拟化/" style="font-size: 15px;">虚拟化</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://github.com/Mr-lixh" title="github" target="_blank">github</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">lixh.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?13549e9998ed36aa1cfcbd1ebe61afe0";
